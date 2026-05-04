@@ -8,7 +8,6 @@ import { Save, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AppLayout } from "@/components/app-layout"
 import { TagInput, Topic } from "@/components/tag-input"
-import { Separator } from "@/components/ui/separator"
 
 export default function SettingsPage() {
   const [titlePrompt, setTitlePrompt] = useState("")
@@ -134,8 +133,8 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <AppLayout title="AI优化设置">
-        <div className="flex justify-center items-center h-[400px]">
+      <AppLayout>
+        <div className="flex min-h-[400px] items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       </AppLayout>
@@ -143,9 +142,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <AppLayout title="AI优化设置">
-      <div className="max-w-4xl mx-auto">
-        <Card className="mb-8">
+    <AppLayout>
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-normal text-gray-950">设置</h1>
+          <p className="mt-1 text-sm text-gray-500">配置 AI 优化提示词和发布时常用的话题标签。</p>
+        </div>
+
+        <Card className="rounded-xl border-gray-200 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle>标题优化提示词</CardTitle>
             <CardDescription>设置AI优化标题时使用的系统提示词，指导AI如何优化您的标题</CardDescription>
@@ -160,7 +164,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="mb-8">
+        <Card className="rounded-xl border-gray-200 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle>内容优化提示词</CardTitle>
             <CardDescription>设置AI优化内容时使用的系统提示词，指导AI如何优化您的正文内容</CardDescription>
@@ -175,7 +179,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="mb-8">
+        <Card className="rounded-xl border-gray-200 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle>公共标签库</CardTitle>
             <CardDescription>设置常用的标签，这些标签将在创建帖子时自动推荐显示</CardDescription>

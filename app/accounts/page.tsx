@@ -299,27 +299,30 @@ export default function AccountsPage() {
   }
 
   return (
-    <AppLayout title="账号管理">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">小红书账号列表</h2>
+    <AppLayout>
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-normal text-gray-950">账号</h1>
+            <p className="mt-1 text-sm text-gray-500">管理用于发布和同步的小红书账号。</p>
+          </div>
           <Button
             onClick={() => setIsAddDialogOpen(true)}
-            className="bg-red-500 hover:bg-red-600 flex items-center gap-2"
+            className="bg-red-500 hover:bg-red-600 flex items-center gap-2 rounded-full"
           >
             <Plus className="w-4 h-4" />
             添加账号
           </Button>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
+        <Card className="overflow-hidden rounded-xl border-gray-200 bg-white/80 shadow-sm">
+          <CardContent className="overflow-x-auto p-0">
             {isLoading ? (
-              <div className="flex justify-center items-center py-8">
+              <div className="flex min-h-[280px] justify-center items-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-red-500" />
               </div>
             ) : accounts.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-16">
                 <p className="text-muted-foreground">暂无账号，请添加小红书账号</p>
               </div>
             ) : (
@@ -415,7 +418,7 @@ export default function AccountsPage() {
               </Table>
             )}
           </CardContent>
-          <CardFooter className="flex justify-between py-4">
+          <CardFooter className="flex justify-between border-t bg-gray-50/70 py-4">
             <p className="text-sm text-muted-foreground">
               共 {accounts.length} 个账号，{accounts.filter((a) => a.status === "active").length} 个有效
             </p>
