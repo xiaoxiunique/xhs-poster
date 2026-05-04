@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { savePostToHost } from "@/lib/host-storage"
+import { isPublicApiAuthorized } from "@/lib/public-api-auth"
 
 type PublicPostInput = {
   title?: unknown
@@ -7,18 +8,6 @@ type PublicPostInput = {
   tags?: unknown
   images?: unknown
   status?: unknown
-}
-
-function getPublicApiToken(): string | null {
-  return process.env.PUBLIC_API_TOKEN || process.env.XHS_POSTER_PUBLIC_API_TOKEN || null
-}
-
-function isAuthorized(request: Request): boolean {
-  const token = getPublicApiToken()
-  if (!token) return false
-  const auth = request.headers.get("authorization")
-  const bearer = auth?.startsWith("Bearer ") ? auth.slice("Bearer ".length).trim() : null
-  return bearer === token
 }
 
 function stringArray(value: unknown): string[] {
@@ -39,7 +28,7 @@ function normalizePost(input: PublicPostInput) {
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorized(request)) {
+  if (!isPublicApiAuthorized(request)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
   }
 

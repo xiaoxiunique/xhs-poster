@@ -52,6 +52,23 @@ function getHostServerUrl(): string {
   return url.replace(/\/+$/g, "")
 }
 
+function getHostServerPublicUrl(): string {
+  return (process.env.HOST_SERVER_PUBLIC_URL || process.env.XHS_POSTER_HOST_SERVER_PUBLIC_URL || getHostServerUrl()).replace(
+    /\/+$/g,
+    "",
+  )
+}
+
+function toPublicHostAssetUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    if (!parsed.pathname.startsWith("/xhs-poster/assets/")) return url
+    return `${getHostServerPublicUrl()}${parsed.pathname}${parsed.search}`
+  } catch {
+    return url
+  }
+}
+
 function getHostServerToken(): string {
   const token = process.env.XHS_POSTER_API_TOKEN || process.env.HOST_SERVER_API_TOKEN
   if (!token) {
@@ -90,10 +107,11 @@ async function hostRequest<T>(path: string, init: HostRequestInit = {}): Promise
 export async function uploadImageToHost(file: File) {
   const formData = new FormData()
   formData.set("file", file)
-  return hostRequest<{ success: true; url: string; key: string }>("/upload", {
+  const result = await hostRequest<{ success: true; url: string; key: string }>("/upload", {
     method: "POST",
     body: formData,
   })
+  return { ...result, url: toPublicHostAssetUrl(result.url) }
 }
 
 export async function listAccounts() {

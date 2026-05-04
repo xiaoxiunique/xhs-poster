@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server"
-
-function getPublicApiToken(): string | null {
-  return process.env.PUBLIC_API_TOKEN || process.env.XHS_POSTER_PUBLIC_API_TOKEN || null
-}
-
-function isAuthorized(request: Request): boolean {
-  const token = getPublicApiToken()
-  if (!token) return false
-  const auth = request.headers.get("authorization")
-  const bearer = auth?.startsWith("Bearer ") ? auth.slice("Bearer ".length).trim() : null
-  return bearer === token
-}
+import { isPublicApiAuthorized } from "@/lib/public-api-auth"
 
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) {
+  if (!isPublicApiAuthorized(request)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
   }
 
