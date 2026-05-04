@@ -69,6 +69,21 @@ function toPublicHostAssetUrl(url: string): string {
   }
 }
 
+function publicizePostSummary(post: StoredPostSummary): StoredPostSummary {
+  return {
+    ...post,
+    coverImage: post.coverImage ? toPublicHostAssetUrl(post.coverImage) : post.coverImage,
+    images: post.images.map(toPublicHostAssetUrl),
+  }
+}
+
+function publicizePost(post: StoredPost): StoredPost {
+  return {
+    ...post,
+    images: post.images.map((image) => ({ ...image, url: toPublicHostAssetUrl(image.url) })),
+  }
+}
+
 function getHostServerToken(): string {
   const token = process.env.XHS_POSTER_API_TOKEN || process.env.HOST_SERVER_API_TOKEN
   if (!token) {
@@ -173,7 +188,8 @@ export async function getCommonTags() {
 
 export async function listPosts(status?: string) {
   const query = status ? `?status=${encodeURIComponent(status)}` : ""
-  return hostRequest<{ posts: StoredPostSummary[] }>(`/posts${query}`)
+  const result = await hostRequest<{ posts: StoredPostSummary[] }>(`/posts${query}`)
+  return { posts: result.posts.map(publicizePostSummary) }
 }
 
 export async function savePostToHost(input: {
@@ -191,12 +207,14 @@ export async function savePostToHost(input: {
 }
 
 export async function getPostFromHost(id: number) {
-  return hostRequest<{ post: StoredPost }>(`/posts/${id}`)
+  const result = await hostRequest<{ post: StoredPost }>(`/posts/${id}`)
+  return { post: publicizePost(result.post) }
 }
 
 export async function getLatestPost(status?: string) {
   const query = status ? `?status=${encodeURIComponent(status)}` : ""
-  return hostRequest<{ post: StoredPostSummary }>(`/posts/latest${query}`)
+  const result = await hostRequest<{ post: StoredPostSummary }>(`/posts/latest${query}`)
+  return { post: publicizePostSummary(result.post) }
 }
 
 export async function deletePostFromHost(id: number) {
@@ -204,5 +222,6 @@ export async function deletePostFromHost(id: number) {
 }
 
 export async function markPostPublished(id: number) {
-  return hostRequest<{ success: true; post: StoredPostSummary }>(`/posts/${id}/published`, { method: "POST" })
+  const result = await hostRequest<{ success: true; post: StoredPostSummary }>(`/posts/${id}/published`, { method: "POST" })
+  return { ...result, post: publicizePostSummary(result.post) }
 }

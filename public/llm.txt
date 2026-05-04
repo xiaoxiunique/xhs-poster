@@ -15,9 +15,9 @@ All `/api/public/*` endpoints require:
 
 ```http
 Authorization: Bearer <PUBLIC_API_TOKEN>
-Content-Type: application/json
 ```
 
+Use `Content-Type: application/json` for JSON requests, and `multipart/form-data` for image uploads.
 Never put the token in prompts that will be shared publicly. Ask the user for the token out of band.
 
 ## Health Check
@@ -57,6 +57,61 @@ Response:
   "url": "https://host.movenotes.club/xhs-poster/assets/1700000000000-id-cover.jpg",
   "key": "1700000000000-id-cover.jpg"
 }
+```
+
+## Query Posts
+
+```http
+GET /api/public/posts
+```
+
+Returns existing posts. Optional query parameters:
+
+- `status`: `draft`, `published`, or `all`; defaults to all statuses.
+- `limit`: 1-100; defaults to 50.
+- `q`: case-insensitive search over title and content.
+- `tag`: exact tag name match.
+
+Request:
+
+```bash
+curl "https://poster.movenotes.club/api/public/posts?status=draft&limit=20" \
+  -H "Authorization: Bearer $PUBLIC_API_TOKEN"
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "posts": [
+    {
+      "id": 123,
+      "title": "标题",
+      "content": "正文内容",
+      "status": "draft",
+      "images": ["https://host.movenotes.club/xhs-poster/assets/image.jpg"],
+      "tags": ["小红书"]
+    }
+  ],
+  "total": 1,
+  "limit": 20
+}
+```
+
+## Query One Post
+
+```http
+GET /api/public/posts/{id}
+```
+
+Returns one post with full image and tag records.
+
+Request:
+
+```bash
+curl "https://poster.movenotes.club/api/public/posts/123" \
+  -H "Authorization: Bearer $PUBLIC_API_TOKEN"
 ```
 
 ## Create Draft Post
