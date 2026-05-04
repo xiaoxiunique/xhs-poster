@@ -15,12 +15,14 @@ export async function POST(request: Request) {
 
     // 设置认证 cookie，有效期 7 天
     const cookieStore = await cookies()
+    const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim()
+    const isHttps = forwardedProto === "https" || new URL(request.url).protocol === "https:"
     cookieStore.set({
       name: "auth",
       value: "true",
       httpOnly: true,
       path: "/",
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       maxAge: 60 * 60 * 24 * 7, // 7 天
       sameSite: "strict",
     })

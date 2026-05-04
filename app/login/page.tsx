@@ -32,6 +32,7 @@ export default function LoginPage() {
       if (response.ok) {
         // 认证成功，重定向到首页
         router.push("/")
+        router.refresh()
       } else {
         // 认证失败，显示错误信息
         const data = await response.json()
