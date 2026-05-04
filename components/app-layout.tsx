@@ -30,9 +30,9 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-30 border-b border-white/60 bg-white/75 shadow-sm shadow-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-white/65">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-4">
+      <header className="sticky top-0 z-30 border-b border-white/60 bg-white/80 shadow-sm shadow-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-white/70">
+        <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
+          <div className="flex min-w-0 flex-1 items-center gap-5">
             {showBackButton ? (
               <Link href="/" className="shrink-0">
                 <Button variant="ghost" size="sm" className="gap-1">
@@ -42,12 +42,17 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
               </Link>
             ) : (
               <Link href="/" className="shrink-0">
-                <h1 className="text-xl font-bold text-red-500 whitespace-nowrap">小红书发布器</h1>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500 text-sm font-bold text-white shadow-sm shadow-red-500/20">
+                    小
+                  </span>
+                  <h1 className="whitespace-nowrap text-lg font-semibold tracking-normal text-gray-950">小红书发布器</h1>
+                </div>
               </Link>
             )}
             {title && <h1 className="truncate text-lg font-medium">{title}</h1>}
             {!showBackButton && (
-              <nav className="hidden md:flex items-center gap-1">
+              <nav className="hidden items-center rounded-full border border-gray-200/80 bg-gray-100/70 p-1 md:flex">
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const active = isActive(item.href)
@@ -56,8 +61,10 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
                       <Button
                         variant={active ? "default" : "ghost"}
                         size="sm"
-                        className={`h-9 gap-1.5 px-3 ${
-                          active ? "bg-red-500 hover:bg-red-600" : "text-gray-700"
+                        className={`h-8 rounded-full gap-1.5 px-3 text-sm shadow-none ${
+                          active
+                            ? "bg-white text-red-600 hover:bg-white"
+                            : "bg-transparent text-gray-600 hover:bg-white/70 hover:text-gray-950"
                         }`}
                       >
                         <Icon className="h-4 w-4" />
@@ -69,20 +76,20 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
               </nav>
             )}
             {!showBackButton && (
-              <div className="hidden lg:flex relative rounded-full bg-gray-100 px-3 py-1.5 w-56 xl:w-64">
-                <Search className="h-4 w-4 text-gray-400 absolute left-3 top-2.5" />
+              <div className="relative hidden h-9 w-52 items-center rounded-full border border-gray-200/80 bg-white/70 px-3 lg:flex xl:w-64">
+                <Search className="absolute left-3 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="搜索帖子..."
-                  className="bg-transparent border-none outline-none pl-7 w-full text-sm"
+                  className="w-full border-none bg-transparent pl-7 text-sm outline-none placeholder:text-gray-400"
                 />
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <AccountStatus />
             <Link href="/create">
-              <Button size="sm" className="bg-red-500 hover:bg-red-600 rounded-full flex items-center gap-1">
+              <Button size="sm" className="rounded-full bg-red-500 shadow-sm shadow-red-500/20 hover:bg-red-600 flex items-center gap-1">
                 <PlusCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">发布</span>
               </Button>
