@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { getActiveXhsAccount } from "@/lib/active-account"
 
 export async function POST(request: Request) {
   try {
@@ -9,16 +9,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "帖子ID不能为空" }, { status: 400 })
     }
 
-    // 获取活跃账号的cookie
-    const activeAccounts = await db.query(`
-      SELECT id, cookie FROM xhs_accounts WHERE status = 'active' LIMIT 1
-    `)
-
-    if (activeAccounts.length === 0) {
+    const activeAccount = await getActiveXhsAccount()
+    if (!activeAccount?.cookie) {
       return NextResponse.json({ success: false, error: "没有活跃的小红书账号，请先添加并激活账号" }, { status: 403 })
     }
 
-    const cookie = activeAccounts[0].cookie
+    const cookie = activeAccount.cookie
 
     // 构建请求头
     const headers = new Headers({
@@ -35,7 +31,11 @@ export async function POST(request: Request) {
     const url = `https://edith.xiaohongshu.com/api/sns/web/v1/feed`
 
     // 构建请求体
-    const requestBody = {
+    const requestBody: {
+      source_note_id: any
+      image_formats: string[]
+      xsec_token?: string
+    } = {
       source_note_id: noteId,
       image_formats: ["jpg", "webp", "avif"],
     }
@@ -75,8 +75,8 @@ export async function POST(request: Request) {
       id: noteData.id,
       title: noteData.title || noteData.display_title || "",
       content: noteData.desc || "",
-      images: noteData.images?.map((img) => img.url) || [],
-      tags: noteData.tag_list?.map((tag) => tag.name) || [],
+      images: noteData.images?.map((img: any) => img.url) || [],
+      tags: noteData.tag_list?.map((tag: any) => tag.name) || [],
       user: {
         id: noteData.user?.user_id || "",
         nickname: noteData.user?.nickname || "",

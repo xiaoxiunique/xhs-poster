@@ -6,9 +6,22 @@ import { PostGrid } from "@/components/post-grid"
 import { CategoryTabs } from "@/components/category-tabs"
 import { AppLayout } from "@/components/app-layout"
 
+type PostSummary = {
+  id: number
+  title: string
+  content: string
+  status: string
+  created_at: string | Date
+  updated_at: string | Date
+  user_id: number
+  coverImage?: string | null
+  images?: string[]
+  tags?: string[]
+}
+
 export default function Home() {
-  const [posts, setPosts] = useState([])
-  const [filteredPosts, setFilteredPosts] = useState([])
+  const [posts, setPosts] = useState<PostSummary[]>([])
+  const [filteredPosts, setFilteredPosts] = useState<PostSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -49,9 +62,7 @@ export default function Home() {
         if (!post.tags) return false
 
         // 将标签数组转换为标签名称数组
-        const tagNames = Array.isArray(post.tags)
-          ? post.tags.map((tag) => (typeof tag === "string" ? tag : tag.name))
-          : []
+        const tagNames = Array.isArray(post.tags) ? post.tags : []
 
         console.log("帖子标签:", tagNames)
         return tagNames.includes(tagName)

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { getActiveXhsAccount } from "@/lib/active-account"
 
 export async function POST(request: Request) {
   try {
@@ -9,12 +9,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "关键词不能为空" }, { status: 400 })
     }
 
-    // 检查是否有活跃账号
-    const activeAccount = await db.query(`
-      SELECT id, cookie FROM xhs_accounts WHERE status = 'active' LIMIT 1
-    `)
-
-    if (activeAccount.length === 0) {
+    const activeAccount = await getActiveXhsAccount()
+    if (!activeAccount) {
       return NextResponse.json({ error: "没有活跃的小红书账号，请先添加并激活账号" }, { status: 403 })
     }
 

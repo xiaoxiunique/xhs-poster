@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import XhsPoster from "@/lib/xhs";
-import { db } from "@/lib/db";
+import { getActiveXhsAccount } from "@/lib/active-account";
 
 export async function POST(request: Request) {
   try {
@@ -13,19 +13,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // 获取活跃账号的cookie
-    const activeAccounts = await db.query(`
-        SELECT id, cookie FROM xhs_accounts WHERE status = 'active' LIMIT 1
-      `);
-
-    if (activeAccounts.length === 0) {
+    const activeAccount = await getActiveXhsAccount();
+    if (!activeAccount) {
       return NextResponse.json(
         { success: false, error: "没有活跃的小红书账号，请先添加并激活账号" },
         { status: 403 }
       );
     }
 
-    const cookie = activeAccounts[0].cookie;
+    const cookie = activeAccount.cookie;
 
     if (!cookie) {
       return NextResponse.json(

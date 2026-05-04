@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import XhsPoster from "@/lib/xhs";
+import { getAccount } from "@/lib/host-storage";
 
 export async function DELETE(request: Request, context: any) {
   const params = await context.params;
@@ -8,14 +8,11 @@ export async function DELETE(request: Request, context: any) {
   if (isNaN(id)) {
     return NextResponse.json({ error: "无效的账号ID" }, { status: 400 });
   }
-  const accounts = await db.query(
-    `SELECT id, name, cookie FROM xhs_accounts WHERE id = $1`,
-    [id]
-  );
-  if (accounts.length === 0) {
+  const account = await getAccount(id).catch(() => null);
+  if (!account?.cookie) {
     return NextResponse.json({ error: "账号不存在" }, { status: 404 });
   }
-  const cookie = accounts[0].cookie;
+  const cookie = account.cookie;
   console.log("🚀 ~ DELETE ~ cookie:", cookie);
 
   const poster = new XhsPoster(cookie);

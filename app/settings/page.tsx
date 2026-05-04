@@ -75,8 +75,14 @@ export default function SettingsPage() {
     }
   }
 
-  const handleTagsChange = (tags: Topic[]) => {
-    setCommonTags(tags)
+  const handleTagsChange = (tags: string[] | Topic[]) => {
+    setCommonTags(
+      tags.map((tag) =>
+        typeof tag === "string"
+          ? { name: tag, link: "", view_num: 0, type: "official", smart: false, id: `tag-${tag}` }
+          : tag,
+      ),
+    )
   }
 
   const handleSave = async () => {

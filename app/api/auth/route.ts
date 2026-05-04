@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     // 设置认证 cookie，有效期 7 天
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     cookieStore.set({
       name: "auth",
       value: "true",

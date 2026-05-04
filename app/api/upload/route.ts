@@ -1,5 +1,5 @@
-import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
+import { uploadImageToHost } from "@/lib/host-storage"
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -15,19 +15,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "只允许上传图片文件" }, { status: 400 })
     }
 
-    // 生成唯一文件名
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`
-
-    // 上传到Blob存储
-    const blob = await put(fileName, file, {
-      access: "public",
-      contentType: file.type,
-    })
-
-    return NextResponse.json({
-      url: blob.url,
-      success: true,
-    })
+    const result = await uploadImageToHost(file)
+    return NextResponse.json(result)
   } catch (error) {
     console.error("图片上传失败:", error)
     return NextResponse.json({ error: "图片上传失败", details: error }, { status: 500 })

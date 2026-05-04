@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
 import { getSearchId } from "@/lib/search-utils"
+import { getActiveXhsAccount } from "@/lib/active-account"
 
 export async function POST(request: Request) {
   try {
@@ -10,16 +10,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "关键词不能为空" }, { status: 400 })
     }
 
-    // 获取活跃账号的cookie
-    const activeAccounts = await db.query(`
-      SELECT id, cookie FROM xhs_accounts WHERE status = 'active' LIMIT 1
-    `)
-
-    if (activeAccounts.length === 0) {
+    const activeAccount = await getActiveXhsAccount()
+    if (!activeAccount?.cookie) {
       return NextResponse.json({ success: false, error: "没有活跃的小红书账号，请先添加并激活账号" }, { status: 403 })
     }
 
-    const cookie = activeAccounts[0].cookie
+    const cookie = activeAccount.cookie
 
     // 构建请求头
     const headers = new Headers({
@@ -66,7 +62,7 @@ export async function POST(request: Request) {
 
     // 格式化返回结果
     const formattedResults = data.data.items
-      .filter((item) => item.model_type === "note")
+      .filter((item: any) => item.model_type === "note")
       .map((item: any) => {
         // 尝试从不同位置获取xsec_token
         const xsecToken = item.note_card?.xsec_token || item.xsec_token || item.note_card?.share_info?.xsec_token || ""

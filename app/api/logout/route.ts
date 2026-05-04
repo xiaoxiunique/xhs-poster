@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 export async function POST() {
   try {
     // 删除认证 cookie
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     cookieStore.delete("auth")
 
     return NextResponse.json({ success: true })

@@ -1,42 +1,7 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import XhsPoster from "@/lib/xhs";
-import { verifyXhsCookie } from "@/lib/api-service";
+import { NextResponse } from "next/server"
+import XhsPoster from "@/lib/xhs"
+import { getAccount, getLatestPost, getSettings, markPostPublished } from "@/lib/host-storage"
 
-// 获取公共标签（复用逻辑）
-async function ensureKvTable() {
-  try {
-    const tableExists = await db.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'kv'
-      );
-    `);
-    if (!tableExists[0].exists) {
-      await db.query(`
-        CREATE TABLE kv (
-          key TEXT PRIMARY KEY,
-          data JSONB NOT NULL
-        );
-      `);
-    }
-  } catch (error) {
-    throw error;
-  }
-}
-async function getCommonTopics() {
-  try {
-    await ensureKvTable();
-    const result = await db.query(`SELECT data FROM kv WHERE key = 'system_settings'`);
-    if (result.length === 0 || !result[0].data.commonTags || result[0].data.commonTags.length === 0) {
-      return getDefaultTopics();
-    }
-    return result[0].data.commonTags;
-  } catch {
-    return getDefaultTopics();
-  }
-}
 function getDefaultTopics() {
   return [
     { type: "official", smart: false, id: "5bf54ae0e1921600011295f8", name: "程序员", link: "https://www.xiaohongshu.com/page/topics/5bf54ae0c3f6740001ee10fd?naviHidden=yes", view_num: 2919330080 },
@@ -46,76 +11,48 @@ function getDefaultTopics() {
     { link: "https://www.xiaohongshu.com/page/topics/5c0f70b75237920001b360e6?naviHidden=yes", view_num: 282335740, type: "official", smart: false, id: "5c0f70b73767f600014af155", name: "软件开发" },
     { link: "https://www.xiaohongshu.com/page/topics/5cac833df6928f0001428a54?naviHidden=yes", view_num: 188394464, type: "official", smart: false, id: "5cac833d000000000f02a8d6", name: "小程序开发" },
     { id: "611a696f000000000100b965", name: "App开发", link: "https://www.xiaohongshu.com/page/topics/611a696f61a1e70001524c10?naviHidden=yes", view_num: 70650808, type: "official", smart: false },
-  ];
+  ]
+}
+
+async function getCommonTopics() {
+  try {
+    const settings = await getSettings()
+    return settings.commonTags?.length ? settings.commonTags : getDefaultTopics()
+  } catch {
+    return getDefaultTopics()
+  }
 }
 
 export async function POST(request: Request, context: any) {
   try {
-    const params = await context.params;
-    const accountId = Number.parseInt(params.id);
+    const params = await context.params
+    const accountId = Number.parseInt(params.id)
     if (isNaN(accountId)) {
-      return NextResponse.json({ success: false, error: "无效的账号ID" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "无效的账号ID" }, { status: 400 })
     }
-    // 获取账号信息
-    const accounts = await db.query(
-      `SELECT id, cookie FROM xhs_accounts WHERE id = $1`,
-      [accountId]
-    );
-    if (accounts.length === 0) {
-      return NextResponse.json({ success: false, error: "账号不存在" }, { status: 404 });
+
+    const account = await getAccount(accountId)
+    if (!account.cookie) {
+      return NextResponse.json({ success: false, error: "账号Cookie为空" }, { status: 400 })
     }
-    const cookie = accounts[0].cookie;
-    // 检查登录状态（直接请求小红书接口）
+
     const headers = new Headers({
-      Cookie: cookie,
+      Cookie: account.cookie,
       Accept: "application/json, text/plain, */*",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-    });
-    const resp = await fetch("https://edith.xiaohongshu.com/api/sns/web/v2/user/me", {
-      method: "GET",
-      headers,
-    });
-    const data = await resp.json();
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    })
+    const resp = await fetch("https://edith.xiaohongshu.com/api/sns/web/v2/user/me", { method: "GET", headers })
+    const data = await resp.json()
     if (!data.data || !data.data.user_id) {
-      return NextResponse.json({ success: false, error: "账号登录状态无效或已过期" }, { status: 401 });
+      return NextResponse.json({ success: false, error: "账号登录状态无效或已过期" }, { status: 401 })
     }
-    // 查找该账号下最早未发布的帖子
-    const posts = await db.query(
-      `SELECT id, title, content, status FROM posts ORDER BY updated_at ASC LIMIT 1`
-    );
-    if (posts.length === 0) {
-      return NextResponse.json({ success: false, error: "没有未发布的帖子" }, { status: 404 });
-    }
-    const post = posts[0];
-    // 获取帖子图片
-    const images = await db.query(
-      `SELECT url FROM images WHERE post_id = $1 ORDER BY display_order ASC`,
-      [post.id]
-    );
-    // 获取帖子标签
-    const tags = await db.query(
-      `SELECT t.name FROM tags t JOIN post_tags pt ON t.id = pt.tag_id WHERE pt.post_id = $1`,
-      [post.id]
-    );
-    // 获取公共标签
-    const commonTopics = await getCommonTopics();
-    // 发布帖子
-    const xhsPoster = new XhsPoster(cookie);
-    const res = await xhsPoster.createImageNote(
-      post.title,
-      post.content,
-      images.map((img) => img.url),
-      null,
-      [],
-      commonTopics,
-      false
-    );
-    // 更新帖子状态
-    await db.query(
-      `UPDATE posts SET status = 'published', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-      [post.id]
-    );
+
+    const { post } = await getLatestPost("draft")
+    const commonTopics = await getCommonTopics()
+    const xhsPoster = new XhsPoster(account.cookie)
+    const res = await xhsPoster.createImageNote(post.title, post.content, post.images, null, [], commonTopics, false)
+
+    await markPostPublished(post.id)
     return NextResponse.json({
       success: true,
       message: "已发布最早未发布的帖子",
@@ -124,13 +61,13 @@ export async function POST(request: Request, context: any) {
         title: post.title,
         content: post.content,
         status: "published",
-        images: images.map((img) => img.url),
-        tags: tags.map((tag) => tag.name),
+        images: post.images,
+        tags: post.tags,
         res,
       },
-    });
+    })
   } catch (error) {
-    console.error("发布最新未发布帖子失败:", error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "处理请求时出错" }, { status: 500 });
+    console.error("发布最新未发布帖子失败:", error)
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "处理请求时出错" }, { status: 500 })
   }
-} 
+}

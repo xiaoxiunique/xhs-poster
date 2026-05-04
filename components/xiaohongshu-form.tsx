@@ -117,8 +117,8 @@ export function XiaohongshuForm({ initialData }: XiaohongshuFormProps) {
     setPostData((prev) => ({ ...prev, images: imageUrls }))
   }
 
-  const handleTagsChange = (tags: string[]) => {
-    setPostData((prev) => ({ ...prev, tags }))
+  const handleTagsChange = (tags: string[] | { name: string }[]) => {
+    setPostData((prev) => ({ ...prev, tags: tags.map((tag) => (typeof tag === "string" ? tag : tag.name)) }))
   }
 
   const handleExport = () => {
@@ -146,7 +146,7 @@ export function XiaohongshuForm({ initialData }: XiaohongshuFormProps) {
 
       if (result.success) {
         // 使用 router 进行客户端导航
-        router.push(result.redirectTo || "/")
+        router.push("redirectTo" in result ? result.redirectTo : "/")
       } else {
         alert(result.error || "保存失败，请重试")
       }

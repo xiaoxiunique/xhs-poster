@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     // 获取用户设置的system prompt
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     let systemPrompt = ""
 
     if (type === "title") {
