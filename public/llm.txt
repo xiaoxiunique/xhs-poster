@@ -3,6 +3,12 @@
 This app accepts external draft content through a small token-protected API.
 Use these endpoints when an AI assistant needs to add post material to xhs-poster.
 
+## Base URL
+
+```text
+https://poster.movenotes.club
+```
+
 ## Authentication
 
 All `/api/public/*` endpoints require:
@@ -87,7 +93,7 @@ Batch mode accepts up to 20 posts per request:
 ## cURL Example
 
 ```bash
-curl -X POST "https://YOUR_DOMAIN/api/public/posts" \
+curl -X POST "https://poster.movenotes.club/api/public/posts" \
   -H "Authorization: Bearer $PUBLIC_API_TOKEN" \
   -H "Content-Type: application/json" \
   --data '{
