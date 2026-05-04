@@ -48,18 +48,14 @@ export default function Home() {
       setFilteredPosts(posts.filter((post) => post.status === "draft"))
     } else if (category === "published") {
       setFilteredPosts(posts.filter((post) => post.status === "published"))
-    } else if (category.startsWith("tag-")) {
-      // 提取标签名称
-      const tagName = category.replace("tag-", "")
-
-      // 过滤包含该标签的帖子
+    } else if (category === "uncategorized") {
+      setFilteredPosts(posts.filter((post) => !post.tags || post.tags.length === 0))
+    } else if (category.startsWith("category-")) {
+      const categoryName = decodeURIComponent(category.replace("category-", ""))
       const filtered = posts.filter((post) => {
-        // 检查帖子是否有标签数组
         if (!post.tags) return false
-
-        // 将标签数组转换为标签名称数组
-        const tagNames = Array.isArray(post.tags) ? post.tags : []
-        return tagNames.includes(tagName)
+        const categoryNames = Array.isArray(post.tags) ? post.tags : []
+        return categoryNames.includes(categoryName)
       })
 
       setFilteredPosts(filtered)
@@ -68,10 +64,8 @@ export default function Home() {
 
   return (
     <AppLayout>
-      {/* 分类标签 */}
       <CategoryTabs posts={posts} onFilterChange={handleFilterChange} />
 
-      {/* 帖子网格 */}
       <div className="mt-4">
         {isLoading ? (
           <PostGridSkeleton />

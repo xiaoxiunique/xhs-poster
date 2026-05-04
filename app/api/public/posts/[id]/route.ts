@@ -15,7 +15,10 @@ export async function GET(request: Request, context: any) {
     }
 
     const result = await getPostFromHost(id)
-    return NextResponse.json({ success: true, post: result.post })
+    return NextResponse.json({
+      success: true,
+      post: { ...result.post, categories: result.post.tags.map((tag) => tag.name) },
+    })
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "failed to query post" },

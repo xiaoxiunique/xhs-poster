@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Save, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AppLayout } from "@/components/app-layout"
-import { TagInput, Topic } from "@/components/tag-input"
+import { MaterialCategoryManager } from "@/components/material-category-manager"
+import { normalizeMaterialCategories, type MaterialCategory } from "@/lib/material-categories"
 
 export default function SettingsPage() {
   const [titlePrompt, setTitlePrompt] = useState("")
   const [contentPrompt, setContentPrompt] = useState("")
-  const [commonTags, setCommonTags] = useState<Topic[]>([])
+  const [commonTags, setCommonTags] = useState<unknown[]>([])
+  const [materialCategories, setMaterialCategories] = useState<MaterialCategory[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
@@ -33,6 +35,7 @@ export default function SettingsPage() {
         setTitlePrompt(data.titlePrompt || "请将小红书标题优化得更吸引人、更有点击率，同时保持原意，不超过20个字。使用生动的形容词，增加情感色彩。")
         setContentPrompt(data.contentPrompt || "请将小红书正文内容优化，使其更生动、更有吸引力，同时保持原意，不超过1000个字。使用通俗易懂的语言，增加情感共鸣，适当使用emoji表情，分段清晰。")
         setCommonTags(data.commonTags || [])
+        setMaterialCategories(normalizeMaterialCategories(data.materialCategories))
       } catch (error) {
         console.error("获取设置失败:", error)
         toast({
@@ -45,6 +48,7 @@ export default function SettingsPage() {
         setTitlePrompt("请将小红书标题优化得更吸引人、更有点击率，同时保持原意，不超过20个字。使用生动的形容词，增加情感色彩。")
         setContentPrompt("请将小红书正文内容优化，使其更生动、更有吸引力，同时保持原意，不超过1000个字。使用通俗易懂的语言，增加情感共鸣，适当使用emoji表情，分段清晰。")
         setCommonTags([])
+        setMaterialCategories([])
       } finally {
         setIsLoading(false)
       }
@@ -52,37 +56,6 @@ export default function SettingsPage() {
     
     fetchSettings()
   }, [toast])
-
-  const searchTopics = async (keyword: string): Promise<Topic[]> => {
-    try {
-      const res = await fetch("/api/search-topics", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ keyword }),
-      })
-
-      if (!res.ok) {
-        throw new Error("搜索话题失败")
-      }
-
-      return await res.json()
-    } catch (error) {
-      console.error("搜索话题错误:", error)
-      return []
-    }
-  }
-
-  const handleTagsChange = (tags: string[] | Topic[]) => {
-    setCommonTags(
-      tags.map((tag) =>
-        typeof tag === "string"
-          ? { name: tag, link: "", view_num: 0, type: "official", smart: false, id: `tag-${tag}` }
-          : tag,
-      ),
-    )
-  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -97,6 +70,7 @@ export default function SettingsPage() {
           titlePrompt,
           contentPrompt,
           commonTags,
+          materialCategories,
         }),
       })
 
@@ -106,7 +80,7 @@ export default function SettingsPage() {
 
       toast({
         title: "设置已保存",
-        description: "您的AI优化提示词和公共标签设置已成功保存",
+        description: "AI 优化提示词和素材分类已保存",
       })
     } catch (error) {
       console.error("保存设置失败:", error)
@@ -128,7 +102,6 @@ export default function SettingsPage() {
     setContentPrompt(
       "请将小红书正文内容优化，使其更生动、更有吸引力，同时保持原意，不超过1000个字。使用通俗易懂的语言，增加情感共鸣，适当使用emoji表情，分段清晰。",
     )
-    setCommonTags([])
   }
 
   if (isLoading) {
@@ -146,7 +119,7 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-normal text-gray-950">设置</h1>
-          <p className="mt-1 text-sm text-gray-500">配置 AI 优化提示词和发布时常用的话题标签。</p>
+          <p className="mt-1 text-sm text-gray-500">配置 AI 优化提示词和素材分类。</p>
         </div>
 
         <Card className="rounded-xl border-gray-200 bg-white/80 shadow-sm">
@@ -181,17 +154,11 @@ export default function SettingsPage() {
 
         <Card className="rounded-xl border-gray-200 bg-white/80 shadow-sm">
           <CardHeader>
-            <CardTitle>公共标签库</CardTitle>
-            <CardDescription>设置常用的标签，这些标签将在创建帖子时自动推荐显示</CardDescription>
+            <CardTitle>素材归类管理</CardTitle>
+            <CardDescription>维护创建素材时可选择的分类。</CardDescription>
           </CardHeader>
           <CardContent>
-            <TagInput 
-              topics={commonTags} 
-              onChange={handleTagsChange} 
-              maxTags={50}
-              searchTopics={searchTopics}
-              isSettingsMode={true}
-            />
+            <MaterialCategoryManager categories={materialCategories} onChange={setMaterialCategories} />
           </CardContent>
         </Card>
 

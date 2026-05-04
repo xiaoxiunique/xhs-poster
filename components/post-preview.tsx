@@ -100,7 +100,7 @@ export function PostPreview({ postData }: PostPreviewProps) {
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
               <Badge key={index} variant="outline" className="font-normal text-xs">
-                #{tag}
+                {tag}
               </Badge>
             ))}
           </div>

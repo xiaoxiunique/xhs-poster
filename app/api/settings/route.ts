@@ -3,11 +3,12 @@ import { getSettings, saveSettings } from "@/lib/host-storage"
 
 export async function POST(request: Request) {
   try {
-    const { titlePrompt, contentPrompt, commonTags } = await request.json()
+    const { titlePrompt, contentPrompt, commonTags, materialCategories } = await request.json()
     await saveSettings({
       titlePrompt,
       contentPrompt,
       commonTags: commonTags || [],
+      materialCategories: materialCategories || [],
     })
 
     return NextResponse.json({ success: true })

@@ -2,22 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { ImageUpload } from "@/components/image-upload"
-import { TagInput } from "@/components/tag-input"
+import { MaterialCategorySelect } from "@/components/material-category-select"
 import { PostPreview } from "@/components/post-preview"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { Download, Eye, Save, ArrowLeft, Sparkles, Loader2, ScanText } from "lucide-react"
+import { Download, Eye, Save, ArrowLeft, Sparkles, Loader2, ScanText, Search } from "lucide-react"
 import { savePost } from "@/app/actions"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { CompetitorSearchDialog } from "@/components/competitor-search-dialog"
-import { Search } from "lucide-react" // Import Search component
-import XhsPoster from "@/lib/xhs"; // 确保引入 XhsPoster
-import type { Topic } from "@/components/tag-input"; // 引入 Topic 类型
 
 export type PostData = {
   id?: number
@@ -47,44 +44,6 @@ export function XiaohongshuForm({ initialData }: XiaohongshuFormProps) {
   const [isContentOptimizing, setIsContentOptimizing] = useState(false)
   const [isExtractingText, setIsExtractingText] = useState(false)
   const [isCompetitorDialogOpen, setIsCompetitorDialogOpen] = useState(false)
-
-  // 新增 searchTopics 函数，现在调用 API 路由
-  const searchTopics = async (keyword: string): Promise<Topic[]> => {
-    if (!keyword.trim()) {
-      return [];
-    }
-    try {
-      const response = await fetch("/api/search-topics", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ keyword }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "搜索话题失败，无法解析错误响应" }));
-        console.error("Error searching XHS topics (API response not OK):", response.status, errorData);
-        toast({
-          title: "话题搜索失败",
-          description: errorData.error || `服务器错误: ${response.status}`,
-          variant: "destructive",
-        });
-        return [];
-      }
-
-      const topics = await response.json();
-      return topics as Topic[]; // 假设 API 返回 Topic[] 结构
-    } catch (error) {
-      console.error("Error searching XHS topics (fetch failed):", error);
-      toast({
-        title: "话题搜索失败",
-        description: "无法连接到服务器或发生网络错误。",
-        variant: "destructive",
-      });
-      return [];
-    }
-  };
 
   useEffect(() => {
     // 检查是否有草稿数据
@@ -117,8 +76,8 @@ export function XiaohongshuForm({ initialData }: XiaohongshuFormProps) {
     setPostData((prev) => ({ ...prev, images: imageUrls }))
   }
 
-  const handleTagsChange = (tags: string[] | { name: string }[]) => {
-    setPostData((prev) => ({ ...prev, tags: tags.map((tag) => (typeof tag === "string" ? tag : tag.name)) }))
+  const handleCategoriesChange = (categories: string[]) => {
+    setPostData((prev) => ({ ...prev, tags: categories }))
   }
 
   const handleExport = () => {
@@ -408,14 +367,9 @@ export function XiaohongshuForm({ initialData }: XiaohongshuFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <h2 className="text-xl font-semibold">标签</h2>
-                  <p className="text-sm text-muted-foreground">添加相关标签（建议5-10个）</p>
-                  <TagInput 
-                    tags={postData.tags} 
-                    onChange={handleTagsChange} 
-                    searchTopics={searchTopics}
-                    showCommonTags={true}
-                  />
+                  <h2 className="text-xl font-semibold">素材归类</h2>
+                  <p className="text-sm text-muted-foreground">选择素材所属分类</p>
+                  <MaterialCategorySelect value={postData.tags} onChange={handleCategoriesChange} />
                 </div>
 
                 <div className="flex justify-end gap-4 pt-4">

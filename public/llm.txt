@@ -70,7 +70,7 @@ Returns existing posts. Optional query parameters:
 - `status`: `draft`, `published`, or `all`; defaults to all statuses.
 - `limit`: 1-100; defaults to 50.
 - `q`: case-insensitive search over title and content.
-- `tag`: exact tag name match.
+- `category`: exact material category match. `tag` is still accepted for backward compatibility.
 
 Request:
 
@@ -91,7 +91,7 @@ Response:
       "content": "正文内容",
       "status": "draft",
       "images": ["https://host.movenotes.club/xhs-poster/assets/image.jpg"],
-      "tags": ["小红书"]
+      "categories": ["小红书"]
     }
   ],
   "total": 1,
@@ -105,7 +105,7 @@ Response:
 GET /api/public/posts/{id}
 ```
 
-Returns one post with full image and tag records.
+Returns one post with full image and category records.
 
 Request:
 
@@ -120,9 +120,10 @@ curl "https://poster.movenotes.club/api/public/posts/123" \
 POST /api/public/posts
 ```
 
-Creates one draft post. `title` and `content` are required. `tags` and `images` are optional arrays.
+Creates one draft post. `title` and `content` are required. `categories` and `images` are optional arrays.
 Image URLs must be absolute `http://` or `https://` URLs.
 If the image is a local file, call `/api/public/upload` first and use the returned `url`.
+`tags` is still accepted as a backward-compatible alias for `categories`.
 
 Request:
 
@@ -130,7 +131,7 @@ Request:
 {
   "title": "标题",
   "content": "正文内容",
-  "tags": ["小红书", "AI"],
+  "categories": ["小红书", "AI"],
   "images": ["https://example.com/image.jpg"],
   "status": "draft"
 }
@@ -160,13 +161,13 @@ Batch mode accepts up to 20 posts per request:
     {
       "title": "第一篇标题",
       "content": "第一篇正文",
-      "tags": ["tag1"],
+      "categories": ["分类1"],
       "images": []
     },
     {
       "title": "第二篇标题",
       "content": "第二篇正文",
-      "tags": ["tag2"],
+      "categories": ["分类2"],
       "images": ["https://example.com/cover.png"]
     }
   ]
@@ -186,7 +187,7 @@ curl -X POST "https://poster.movenotes.club/api/public/posts" \
   --data '{
     "title": "DePIN 节点部署笔记",
     "content": "整理一篇适合小红书发布的 DePIN 节点部署经验...",
-    "tags": ["DePIN", "Web3", "节点"],
+    "categories": ["DePIN", "Web3", "节点"],
     "images": ["'"$IMAGE_URL"'"]
   }'
 ```

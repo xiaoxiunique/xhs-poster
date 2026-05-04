@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { normalizeMaterialCategories, type MaterialCategory } from "@/lib/material-categories"
 
 interface CategoryTabsProps {
   posts: any[]
@@ -10,54 +11,57 @@ interface CategoryTabsProps {
 
 export function CategoryTabs({ posts, onFilterChange }: CategoryTabsProps) {
   const [activeCategory, setActiveCategory] = useState("all")
+  const [managedCategories, setManagedCategories] = useState<MaterialCategory[]>([])
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([
     { id: "all", name: "全部" },
     { id: "draft", name: "草稿" },
     { id: "published", name: "已发布" },
   ])
 
-  // 从帖子标签中提取分类
   useEffect(() => {
-    if (!posts || posts.length === 0) return
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/settings")
+        if (!response.ok) throw new Error("获取素材分类失败")
+        const data = await response.json()
+        setManagedCategories(normalizeMaterialCategories(data.materialCategories))
+      } catch (error) {
+        console.error("获取素材分类失败:", error)
+      }
+    }
 
-    console.log("提取标签的帖子数据:", posts)
+    fetchCategories()
+  }, [])
 
-    // 收集所有标签
-    const allTags: string[] = []
-    posts.forEach((post) => {
-      // 检查帖子是否有标签
+  useEffect(() => {
+    const assignedCategories: string[] = []
+    posts?.forEach((post) => {
       if (post.tags && Array.isArray(post.tags)) {
         post.tags.forEach((tag: any) => {
-          // 处理不同格式的标签
           if (typeof tag === "string") {
-            allTags.push(tag)
+            assignedCategories.push(tag)
           } else if (tag && typeof tag === "object" && tag.name) {
-            allTags.push(tag.name)
+            assignedCategories.push(tag.name)
           }
         })
       }
     })
 
-    console.log("提取的所有标签:", allTags)
-
-    // 获取唯一标签
-    const uniqueTags = [...new Set(allTags)]
-    console.log("唯一标签:", uniqueTags)
-
-    // 将标签转换为分类格式
-    const tagCategories = uniqueTags.map((tag) => ({ id: `tag-${tag}`, name: tag }))
-
-    // 合并默认分类和标签分类
+    const categoryNames = [
+      ...managedCategories.map((category) => category.name),
+      ...assignedCategories.filter((name) => !managedCategories.some((category) => category.name === name)),
+    ]
+    const hasUncategorized = posts?.some((post) => !post.tags || post.tags.length === 0)
     const newCategories = [
       { id: "all", name: "全部" },
       { id: "draft", name: "草稿" },
       { id: "published", name: "已发布" },
-      ...tagCategories,
+      ...(hasUncategorized ? [{ id: "uncategorized", name: "未归类" }] : []),
+      ...[...new Set(categoryNames)].map((name) => ({ id: `category-${encodeURIComponent(name)}`, name })),
     ]
 
-    console.log("设置分类:", newCategories)
     setCategories(newCategories)
-  }, [posts])
+  }, [managedCategories, posts])
 
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId)

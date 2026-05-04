@@ -5,6 +5,7 @@ import { isPublicApiAuthorized } from "@/lib/public-api-auth"
 type PublicPostInput = {
   title?: unknown
   content?: unknown
+  categories?: unknown
   tags?: unknown
   images?: unknown
   status?: unknown
@@ -18,7 +19,8 @@ function normalizePost(input: PublicPostInput) {
   const title = typeof input.title === "string" ? input.title.trim() : ""
   const content = typeof input.content === "string" ? input.content.trim() : ""
   const status = input.status === "published" ? "published" : "draft"
-  const tags = stringArray(input.tags)
+  const categories = stringArray(input.categories)
+  const tags = categories.length > 0 ? categories : stringArray(input.tags)
   const images = stringArray(input.images).filter((url) => /^https?:\/\//i.test(url))
 
   if (!title) throw new Error("title is required")
@@ -43,7 +45,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const status = url.searchParams.get("status")
     const query = (url.searchParams.get("q") || "").trim().toLowerCase()
-    const tag = (url.searchParams.get("tag") || "").trim().toLowerCase()
+    const tag = (url.searchParams.get("category") || url.searchParams.get("tag") || "").trim().toLowerCase()
     const limit = normalizeLimit(url.searchParams.get("limit"))
     const statusFilter = status && status !== "all" ? status : undefined
 
@@ -58,7 +60,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
-      posts,
+      posts: posts.map((post) => ({ ...post, categories: post.tags })),
       total: posts.length,
       limit,
     })

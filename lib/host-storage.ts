@@ -172,10 +172,16 @@ export async function getSettings() {
     titlePrompt: string
     contentPrompt: string
     commonTags: unknown[]
+    materialCategories?: unknown[]
   }>("/settings")
 }
 
-export async function saveSettings(input: { titlePrompt: string; contentPrompt: string; commonTags: unknown[] }) {
+export async function saveSettings(input: {
+  titlePrompt: string
+  contentPrompt: string
+  commonTags: unknown[]
+  materialCategories?: unknown[]
+}) {
   return hostRequest<{ success: true }>("/settings", {
     method: "POST",
     body: input,
