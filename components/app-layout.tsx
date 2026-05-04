@@ -50,7 +50,7 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
                 </div>
               </Link>
             )}
-            {title && <h1 className="truncate text-lg font-medium">{title}</h1>}
+            {showBackButton && title && <h1 className="truncate text-lg font-medium">{title}</h1>}
             {!showBackButton && (
               <nav className="hidden items-center rounded-full border border-gray-200/80 bg-gray-100/70 p-1 md:flex">
                 {navItems.map((item) => {
