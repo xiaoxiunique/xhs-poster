@@ -188,15 +188,3 @@ export async function deletePostFromHost(id: number) {
 export async function markPostPublished(id: number) {
   return hostRequest<{ success: true; post: StoredPostSummary }>(`/posts/${id}/published`, { method: "POST" })
 }
-
-export async function listMaterials(queryString: string) {
-  const suffix = queryString ? `?${queryString}` : ""
-  return hostRequest<unknown>(`/materials${suffix}`)
-}
-
-export async function saveMaterialsBulk(input: { accountId: number; items: unknown[] }) {
-  return hostRequest<{ success: true; imported: number; existed: number; total: number }>("/materials/bulk", {
-    method: "POST",
-    body: input,
-  })
-}

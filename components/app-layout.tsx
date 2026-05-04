@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/logout-button"
 import { AccountStatus } from "@/components/account-status"
-import { PlusCircle, Search, Home, Settings, User, ArrowLeft, FileText } from "lucide-react"
+import { PlusCircle, Search, Home, Settings, User, ArrowLeft } from "lucide-react"
 
 interface AppLayoutProps {
   children: ReactNode
@@ -23,7 +23,6 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
 
   const navItems = [
     { href: "/", label: "首页", icon: Home },
-    { href: "/materials", label: "素材", icon: FileText },
     { href: "/accounts", label: "账号", icon: User },
     { href: "/settings", label: "设置", icon: Settings },
   ]
@@ -109,14 +108,14 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
             <span className="text-xs mt-1">首页</span>
           </Button>
         </Link>
-        <Link href="/materials">
+        <Link href="/settings">
           <Button
             variant="ghost"
             size="sm"
-            className={`flex flex-col items-center ${isActive("/materials") ? "text-red-500" : ""}`}
+            className={`flex flex-col items-center ${isActive("/settings") ? "text-red-500" : ""}`}
           >
-            <FileText className="h-5 w-5" />
-            <span className="text-xs mt-1">素材</span>
+            <Settings className="h-5 w-5" />
+            <span className="text-xs mt-1">设置</span>
           </Button>
         </Link>
         <Link href="/create">

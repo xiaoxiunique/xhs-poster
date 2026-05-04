@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "小红书发布器",
-  description: "帮助整理小红书帖子发布前的素材",
+  description: "帮助整理小红书帖子发布前的内容",
     generator: 'v0.dev'
 }
 
