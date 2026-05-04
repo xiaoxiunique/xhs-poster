@@ -2,11 +2,11 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { Edit, Trash2, ChevronLeft, ChevronRight, Loader2, ImageIcon } from "lucide-react"
 import Link from "next/link"
 import { deletePost } from "@/app/actions"
 import { useFormStatus } from "react-dom"
@@ -56,22 +56,15 @@ function PostCard({ post }: { post: Post }) {
   const { toast } = useToast()
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-  const imageRef = useRef<HTMLImageElement>(null)
 
   // 确保图片数组是有效的
   const images = post.images && post.images.length > 0 ? post.images : post.coverImage ? [post.coverImage] : []
   const hasMultipleImages = images.length > 1
+  const currentImage = images[currentIndex] || ""
 
-  // 当图片加载完成时计算比例
   useEffect(() => {
-    if (images.length > 0 && imageRef.current) {
-      const img = new Image()
-      img.onload = () => {
-        setImageLoaded(true)
-      }
-      img.src = images[currentIndex]
-    }
-  }, [images, currentIndex])
+    setImageLoaded(false)
+  }, [currentImage])
 
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -120,15 +113,23 @@ function PostCard({ post }: { post: Post }) {
     <>
       <Card className="overflow-hidden flex flex-col rounded-xl shadow-sm w-full">
         <div className="flex-1 cursor-pointer" onClick={() => (window.location.href = `/edit/${post.id}`)}>
-          {/* 图片区域 - 直接自适应图片高度 */}
-          <div className="relative w-full group bg-gray-100">
+          {/* 图片区域 */}
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100 group">
             {images.length > 0 ? (
               <>
+                {!imageLoaded && (
+                  <div className="absolute inset-0 z-[1] animate-pulse bg-gray-100">
+                    <div className="h-full w-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100" />
+                  </div>
+                )}
                 <img
-                  ref={imageRef}
-                  src={images[currentIndex] || "/placeholder.svg"}
+                  src={currentImage || "/placeholder.svg"}
                   alt={post.title}
-                  className="w-full h-auto object-cover cursor-zoom-in"
+                  loading="lazy"
+                  decoding="async"
+                  className={`h-full w-full cursor-zoom-in object-cover transition-opacity duration-200 ${
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  }`}
                   onClick={handleImageClick}
                   onLoad={() => setImageLoaded(true)}
                 />
@@ -160,8 +161,9 @@ function PostCard({ post }: { post: Post }) {
                 )}
               </>
             ) : (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-                <span className="text-gray-400">无图片</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-400">
+                <ImageIcon className="h-8 w-8 opacity-50" />
+                <span className="text-xs">无图片</span>
               </div>
             )}
 
@@ -216,6 +218,45 @@ function PostCard({ post }: { post: Post }) {
         onOpenChange={setIsImageViewerOpen}
       />
     </>
+  )
+}
+
+function SkeletonCard() {
+  return (
+    <Card className="mb-3 break-inside-avoid overflow-hidden rounded-xl shadow-sm">
+      <div className="aspect-[4/5] w-full animate-pulse bg-gray-100" />
+      <div className="space-y-2 p-2">
+        <div className="h-3 w-5/6 rounded bg-gray-100" />
+        <div className="h-3 w-2/3 rounded bg-gray-100" />
+      </div>
+      <div className="flex items-center justify-between border-t px-2 py-1.5">
+        <div className="flex items-center gap-1.5">
+          <div className="h-5 w-5 rounded-full bg-gray-100" />
+          <div className="h-3 w-14 rounded bg-gray-100" />
+        </div>
+        <div className="flex gap-1">
+          <div className="h-6 w-6 rounded bg-gray-100" />
+          <div className="h-6 w-6 rounded bg-gray-100" />
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+export function PostGridSkeleton() {
+  return (
+    <div
+      className="w-full"
+      style={{
+        columnCount: 5,
+        columnGap: "12px",
+        columnWidth: "200px",
+      }}
+    >
+      {Array.from({ length: 10 }).map((_, index) => (
+        <SkeletonCard key={index} />
+      ))}
+    </div>
   )
 }
 

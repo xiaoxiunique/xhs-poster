@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getPosts } from "./actions"
-import { PostGrid } from "@/components/post-grid"
+import { PostGrid, PostGridSkeleton } from "@/components/post-grid"
 import { CategoryTabs } from "@/components/category-tabs"
 import { AppLayout } from "@/components/app-layout"
 
@@ -29,7 +29,6 @@ export default function Home() {
       setIsLoading(true)
       try {
         const postsData = await getPosts()
-        console.log("获取到的帖子数据:", postsData)
         setPosts(postsData)
         setFilteredPosts(postsData)
       } catch (error) {
@@ -43,8 +42,6 @@ export default function Home() {
   }, [])
 
   const handleFilterChange = (category: string) => {
-    console.log("选择的分类:", category)
-
     if (category === "all") {
       setFilteredPosts(posts)
     } else if (category === "draft") {
@@ -54,7 +51,6 @@ export default function Home() {
     } else if (category.startsWith("tag-")) {
       // 提取标签名称
       const tagName = category.replace("tag-", "")
-      console.log("过滤标签:", tagName)
 
       // 过滤包含该标签的帖子
       const filtered = posts.filter((post) => {
@@ -63,12 +59,9 @@ export default function Home() {
 
         // 将标签数组转换为标签名称数组
         const tagNames = Array.isArray(post.tags) ? post.tags : []
-
-        console.log("帖子标签:", tagNames)
         return tagNames.includes(tagName)
       })
 
-      console.log("过滤后的帖子:", filtered)
       setFilteredPosts(filtered)
     }
   }
@@ -81,9 +74,7 @@ export default function Home() {
       {/* 帖子网格 */}
       <div className="mt-4">
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">加载中...</p>
-          </div>
+          <PostGridSkeleton />
         ) : (
           <PostGrid posts={filteredPosts} />
         )}

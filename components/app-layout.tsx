@@ -90,16 +90,6 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
                   账号管理
                 </Button>
               </Link>
-              <Link href="/posts">
-                <Button
-                  variant={isActive("/posts") ? "default" : "ghost"}
-                  className={`w-full justify-start ${isActive("/posts") ? "bg-red-500 hover:bg-red-600" : ""}`}
-                  size="lg"
-                >
-                  <FileText className="mr-2 h-5 w-5" />
-                  帖子管理
-                </Button>
-              </Link>
               <Link href="/materials">
                 <Button
                   variant={isActive("/materials") ? "default" : "ghost"}
