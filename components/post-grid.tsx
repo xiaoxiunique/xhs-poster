@@ -215,7 +215,7 @@ function PostCard({ post }: { post: Post }) {
 
 function SkeletonCard() {
   return (
-    <Card className="mb-3 break-inside-avoid overflow-hidden rounded-xl shadow-sm">
+    <Card className="w-full overflow-hidden rounded-xl shadow-sm">
       <div className="aspect-[4/5] w-full animate-pulse bg-gray-100" />
       <div className="space-y-2 p-2">
         <div className="h-3 w-5/6 rounded bg-gray-100" />
@@ -237,16 +237,14 @@ function SkeletonCard() {
 
 export function PostGridSkeleton() {
   return (
-    <div
-      className="w-full"
-      style={{
-        columnCount: 5,
-        columnGap: "12px",
-        columnWidth: "200px",
-      }}
-    >
+    <div className="flex flex-wrap justify-center gap-3">
       {Array.from({ length: 10 }).map((_, index) => (
-        <SkeletonCard key={index} />
+        <div
+          key={index}
+          className="w-[calc((100%_-_0.75rem)/2)] min-w-[150px] max-w-[220px] sm:w-[180px] lg:w-[200px]"
+        >
+          <SkeletonCard />
+        </div>
       ))}
     </div>
   )
@@ -266,16 +264,12 @@ export function PostGrid({ posts }: PostGridProps) {
   }
 
   return (
-    <div
-      className="w-full"
-      style={{
-        columnCount: 5,
-        columnGap: "12px",
-        columnWidth: "200px",
-      }}
-    >
+    <div className="flex flex-wrap justify-center gap-3">
       {posts.map((post) => (
-        <div key={post.id} className="break-inside-avoid mb-3">
+        <div
+          key={post.id}
+          className="w-[calc((100%_-_0.75rem)/2)] min-w-[150px] max-w-[220px] sm:w-[180px] lg:w-[200px]"
+        >
           <PostCard post={post} />
         </div>
       ))}
