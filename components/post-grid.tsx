@@ -136,7 +136,7 @@ function PostCard({ post }: { post: Post }) {
                 {hasMultipleImages && (
                   <>
                     {/* 图片计数器 */}
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full z-10">
+                    <div className="absolute bottom-2 right-2 z-10 rounded-full bg-black/70 px-2 py-1 text-xs text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
                       {currentIndex + 1}/{images.length}
                     </div>
 
