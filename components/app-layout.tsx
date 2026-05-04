@@ -21,27 +21,56 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
     return pathname === path
   }
 
+  const navItems = [
+    { href: "/", label: "首页", icon: Home },
+    { href: "/materials", label: "素材", icon: FileText },
+    { href: "/accounts", label: "账号", icon: User },
+    { href: "/settings", label: "设置", icon: Settings },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 顶部导航栏 */}
       <header className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
             {showBackButton ? (
-              <Link href="/" className="mr-4">
+              <Link href="/" className="shrink-0">
                 <Button variant="ghost" size="sm" className="gap-1">
                   <ArrowLeft className="h-4 w-4" />
                   <span className="hidden sm:inline">返回</span>
                 </Button>
               </Link>
             ) : (
-              <Link href="/" className="mr-6">
-                <h1 className="text-xl font-bold text-red-500">小红书发布器</h1>
+              <Link href="/" className="shrink-0">
+                <h1 className="text-xl font-bold text-red-500 whitespace-nowrap">小红书发布器</h1>
               </Link>
             )}
-            {title && <h1 className="text-lg font-medium">{title}</h1>}
+            {title && <h1 className="truncate text-lg font-medium">{title}</h1>}
             {!showBackButton && (
-              <div className="hidden md:flex relative rounded-full bg-gray-100 px-3 py-1.5 w-64 ml-4">
+              <nav className="hidden md:flex items-center gap-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon
+                  const active = isActive(item.href)
+                  return (
+                    <Link key={item.href} href={item.href}>
+                      <Button
+                        variant={active ? "default" : "ghost"}
+                        size="sm"
+                        className={`h-9 gap-1.5 px-3 ${
+                          active ? "bg-red-500 hover:bg-red-600" : "text-gray-700"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Button>
+                    </Link>
+                  )
+                })}
+              </nav>
+            )}
+            {!showBackButton && (
+              <div className="hidden lg:flex relative rounded-full bg-gray-100 px-3 py-1.5 w-56 xl:w-64">
                 <Search className="h-4 w-4 text-gray-400 absolute left-3 top-2.5" />
                 <input
                   type="text"
@@ -65,57 +94,7 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
       </header>
 
       <div className="container mx-auto px-4 py-4">
-        {/* 侧边导航 + 主内容区 */}
-        <div className="flex gap-4">
-          {/* 侧边导航 - 在移动端隐藏，在桌面端显示 */}
-          <div className="hidden md:block w-48 shrink-0">
-            <div className="sticky top-20 space-y-2">
-              <Link href="/">
-                <Button
-                  variant={isActive("/") ? "default" : "ghost"}
-                  className={`w-full justify-start ${isActive("/") ? "bg-red-500 hover:bg-red-600" : ""}`}
-                  size="lg"
-                >
-                  <Home className="mr-2 h-5 w-5" />
-                  首页
-                </Button>
-              </Link>
-              <Link href="/accounts">
-                <Button
-                  variant={isActive("/accounts") ? "default" : "ghost"}
-                  className={`w-full justify-start ${isActive("/accounts") ? "bg-red-500 hover:bg-red-600" : ""}`}
-                  size="lg"
-                >
-                  <User className="mr-2 h-5 w-5" />
-                  账号管理
-                </Button>
-              </Link>
-              <Link href="/materials">
-                <Button
-                  variant={isActive("/materials") ? "default" : "ghost"}
-                  className={`w-full justify-start ${isActive("/materials") ? "bg-red-500 hover:bg-red-600" : ""}`}
-                  size="lg"
-                >
-                  <FileText className="mr-2 h-5 w-5" />
-                  素材管理
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button
-                  variant={isActive("/settings") ? "default" : "ghost"}
-                  className={`w-full justify-start ${isActive("/settings") ? "bg-red-500 hover:bg-red-600" : ""}`}
-                  size="lg"
-                >
-                  <Settings className="mr-2 h-5 w-5" />
-                  设置
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* 主内容区 */}
-          <div className="flex-1">{children}</div>
-        </div>
+        {children}
       </div>
 
       {/* 移动端底部导航 */}
