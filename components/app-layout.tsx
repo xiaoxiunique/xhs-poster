@@ -31,7 +31,7 @@ export function AppLayout({ children, showBackButton = false, title }: AppLayout
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 顶部导航栏 */}
-      <header className="sticky top-0 z-10 bg-white border-b shadow-sm">
+      <header className="sticky top-0 z-30 border-b border-white/60 bg-white/75 shadow-sm shadow-black/[0.03] backdrop-blur-xl supports-[backdrop-filter]:bg-white/65">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex min-w-0 flex-1 items-center gap-4">
             {showBackButton ? (

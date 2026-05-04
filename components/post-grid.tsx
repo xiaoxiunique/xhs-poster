@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ChevronLeft, ChevronRight, Loader2, ImageIcon } from "lucide-react"
 import Link from "next/link"
@@ -166,13 +165,6 @@ function PostCard({ post }: { post: Post }) {
                 <span className="text-xs">无图片</span>
               </div>
             )}
-
-            {/* 状态标签 */}
-            <div className="absolute top-2 left-2 z-10">
-              <Badge variant={post.status === "draft" ? "outline" : "default"} className="bg-white/80 text-gray-800">
-                {post.status === "draft" ? "草稿" : "已发布"}
-              </Badge>
-            </div>
           </div>
 
           {/* 标题区域 - 小红书风格 */}
