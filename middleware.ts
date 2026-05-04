@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 // 需要排除的路径，这些路径不需要认证
-const PUBLIC_PATHS = ["/login", "/api/auth", "/api/accounts"]
+const PUBLIC_PATHS = ["/login", "/llm.txt", "/api/auth", "/api/accounts", "/api/public"]
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
